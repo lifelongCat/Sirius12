@@ -6,13 +6,14 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
+# ПЕРЕПИСАТЬ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ НА STATE
 # Объект бота
 bot = Bot(token="5763817832:AAHryUF70705YJcIOraaYVh1njprvtS752Y")
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 logging.basicConfig(level=logging.INFO)
 adminPasswords = {0: 'Вероника', 1: 'VxWorks'}
-adminID = 0
+adminID = None
 isLogin = False
 
 
@@ -64,29 +65,30 @@ async def admin(message: types.Message):
                         reply_markup=keyboard)
 
 
-# Колбэк на кнопку "Статус"
+# Колбэк на кнопку "Тони Старк"
 @dp.callback_query_handler(text="Тони Старк")
 async def _(call: types.CallbackQuery):
-    if Form.adminPassword is None:
-        return
     global adminID
+    if adminID is not None:
+        return
     adminID = 0
     await Form.adminPassword.set()
     await call.message.answer("Для входа в аккаунт введите ответ на контрольный вопрос: Какое кодовое название носило "
                               "модульное дополнение к костюму железного человека, предназначенное для борьбы с Халком?")
 
 
-# Колбэк на кнопку "Сброс груза"
+# Колбэк на кнопку "Григорий Карнацевич"
 @dp.callback_query_handler(text="Григорий Карнацевич")
 async def _(call: types.CallbackQuery):
-    if Form.adminPassword is None:
-        return
     global adminID
+    if adminID is not None:
+        return
     adminID = 1
     await call.message.answer("Для входа в аккаунт введите ответ на контрольный вопрос: с помощью какой операционной "
                               "системы управляется марсоходом Curiosity?")
 
 
+# Проверка пароля в /admin
 @dp.message_handler(state=Form.adminPassword)
 async def processPassword(message: types.Message, state: FSMContext):
     await state.finish()
@@ -97,6 +99,19 @@ async def processPassword(message: types.Message, state: FSMContext):
     global isLogin
     isLogin = True
     await message.reply('Вход выполнен успешно!')
+    # Вывод сообщения с режимом админа
+    buttons = [
+        types.InlineKeyboardButton(text="Управление полётом", callback_data="Управление полётом"),
+        types.InlineKeyboardButton(text="Обновление ПО", callback_data="Обновление ПО"),
+        types.InlineKeyboardButton(text="Сброс груза", callback_data="Сброс груза"),
+        types.InlineKeyboardButton(text="Данные", callback_data="Данные"),
+        types.InlineKeyboardButton(text="Режим автопилота", callback_data="Режим автопилота")
+    ]
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
+    keyboard.add(*buttons)
+    await message.answer("В режиме администратора у вас есть доступ к панели управления станцией. "
+                        "Каждое действие здесь имеет необратимые последствия",
+                        reply_markup=keyboard)
 
 
 if __name__ == "__main__":
