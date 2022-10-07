@@ -5,8 +5,12 @@ import random
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
+import asyncio
 
 # ПЕРЕПИСАТЬ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ НА STATE
+# ДОБАВИТЬ ВЫЗОВ ГЛАВНОГО МЕНЮ В ОТДЕЛЬНОЙ ФУНКЦИИ
+# ВОЗМОЖНО ПОМЕНЯТЬ ЗАДЕРЖКУ
+
 # Объект бота
 bot = Bot(token="5763817832:AAHryUF70705YJcIOraaYVh1njprvtS752Y")
 storage = MemoryStorage()
@@ -19,6 +23,8 @@ isLogin = False
 
 class Form(StatesGroup):
     adminPassword = State()
+    answerFlyControl = State()
+    answerUpdateSoftware = State()
 
 
 # Хэндлер на команду /start
@@ -112,6 +118,82 @@ async def processPassword(message: types.Message, state: FSMContext):
     await message.answer("В режиме администратора у вас есть доступ к панели управления станцией. "
                         "Каждое действие здесь имеет необратимые последствия",
                         reply_markup=keyboard)
+
+
+# Колбэк на кнопку "Управление полётом"
+@dp.callback_query_handler(text="Управление полётом")
+async def _(call: types.CallbackQuery):
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
+    keyboard.add(types.InlineKeyboardButton(text="Подсказка", callback_data="Подсказка"))
+    await Form.answerFlyControl.set()
+    await call.message.answer("Введите ключ верификации, состоящий из 9 строчных латинских символов:",
+                              reply_markup=keyboard)
+
+
+# Колбэк на кнопку "Подсказка"
+@dp.callback_query_handler(text="Подсказка")
+async def _(call: types.CallbackQuery):
+    print("Подсказка callback")
+    await call.message.answer("49.272598, -123.132872 város?")
+
+
+# Проверка ответа на "Управление полётом"
+@dp.message_handler(state=Form.answerFlyControl)
+async def processFlyControl(message: types.Message, state: FSMContext):
+    await state.finish()
+    if message.text != 'Vancouver':
+        await message.reply('Ключ верификации неверен. Попробуйте снова.')
+        await Form.answerFlyControl.set()
+        return
+    await message.reply('Действие верифицировано. Введите желаемую высоту полета станции в километрах')
+
+
+# Колбэк на кнопку "Обновление ПО"
+@dp.callback_query_handler(text="Обновление ПО")
+async def _(call: types.CallbackQuery):
+    await call.message.answer('*Обнаружение ближайших спутников*')
+    await asyncio.sleep(2)
+    await call.message.answer('*Установка соединения*')
+    await asyncio.sleep(2)
+    await call.message.answer('*Обмен сообщениями*')
+    await asyncio.sleep(2)
+    await call.message.answer('*Сообщение отклонено*')
+    await call.message.answer('Не удается подобрать пароль для подключения автоматически… Пароль содержит 9 символов'
+                              ' алфавита: СТТАРКЕСЕ. Необходимо расставить их в определенном порядке и отправить сюда '
+                              'для попытки подключения')
+    await Form.answerUpdateSoftware.set()
+    await call.message.answer("Введите ключ верификации, состоящий из 9 строчных латинских символов:")
+
+
+# Проверка ответа на "Обновление ПО"
+@dp.message_handler(state=Form.answerUpdateSoftware)
+async def processUpdateSoftware(message: types.Message, state: FSMContext):
+    await state.finish()
+    if message.text != 'Тессеракт':
+        await message.reply('Подключение не удалось. Попробуйте другую комбинацию')
+        await Form.answerUpdateSoftware.set()
+        return
+    await message.reply('Подключение произошло успешно! Начинаю загрузку обновлений')
+    await asyncio.sleep(1.5)
+    await message.answer('Загрузка обновления 5%')
+    await asyncio.sleep(2)
+    await message.answer('Загрузка обновления 15%')
+    await asyncio.sleep(2)
+    await message.answer('Загрузка обновления 25%')
+    await asyncio.sleep(2)
+    await message.answer('Загрузка обновления 50%')
+    await asyncio.sleep(1)
+    await message.answer('Загрузка обновления 53%')
+    await asyncio.sleep(0.5)
+    await message.answer('Загрузка обновления 59%')
+    await asyncio.sleep(5)
+    await message.answer('Загрузка обновления 99%')
+    await asyncio.sleep(2)
+    await message.answer('Загрузка обновления 112%')
+    await asyncio.sleep(1.5)
+    await message.answer('Установка обновления')
+    await asyncio.sleep(5)
+    await message.answer('Обновление программного обеспечение установлено')
 
 
 if __name__ == "__main__":
