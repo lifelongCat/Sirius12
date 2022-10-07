@@ -1,15 +1,19 @@
 #!venv/bin/python
 import logging
-from aiogram import Bot, Dispatcher, executor, types
 import random
+import asyncio
+from aiogram import Bot, Dispatcher, executor, types
+from aiogram.types import InputFile
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
-import asyncio
 
 # ПЕРЕПИСАТЬ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ НА STATE
 # ДОБАВИТЬ ВЫЗОВ ГЛАВНОГО МЕНЮ В ОТДЕЛЬНОЙ ФУНКЦИИ
 # ВОЗМОЖНО ПОМЕНЯТЬ ЗАДЕРЖКУ
+# ЗАМЕНИТЬ ФРАЗЫ НА ФИНАЛЬНЫЕ
+# ЗАМЕНИТЬ XLS ФАЙЛ С ДАННЫМИ
+# РЕФАКТОР КОДА
 
 # Объект бота
 bot = Bot(token="5763817832:AAHryUF70705YJcIOraaYVh1njprvtS752Y")
@@ -196,6 +200,11 @@ async def processUpdateSoftware(message: types.Message, state: FSMContext):
     await message.answer('Обновление программного обеспечение установлено')
 
 
+# Колбэк на кнопку "Данные"
+@dp.callback_query_handler(text="Данные")
+async def _(call: types.CallbackQuery):
+    xls_path = "data.xlsx"
+    await call.message.answer_document(InputFile(xls_path))
+
 if __name__ == "__main__":
-    # Запуск бота
     executor.start_polling(dp, skip_updates=True)
