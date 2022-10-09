@@ -25,8 +25,6 @@ async def admin(message: types.Message):
 
 async def tonyStark(call: types.CallbackQuery):
     global adminID
-    if adminID is not None:
-        return
     adminID = 0
     await Admin.admin_password.set()
     await call.message.answer("Для входа в аккаунт введите ответ на контрольный вопрос: Какое кодовое название носило "
@@ -35,20 +33,19 @@ async def tonyStark(call: types.CallbackQuery):
 
 async def grigoryKarnacevich(call: types.CallbackQuery):
     global adminID
-    if adminID is not None:
-        return
     adminID = 1
+    await Admin.admin_password.set()
     await call.message.answer("Для входа в аккаунт введите ответ на контрольный вопрос: с помощью какой операционной "
                               "системы управляется марсоходом Curiosity?")
 
 
 async def processPassword(message: types.Message, state: FSMContext):
-    await state.finish()
     if message.text != adminPasswords[adminID]:
         await message.reply('Ответ на контрольный вопрос неверен. Попробуйте снова.')
         await Admin.adminPassword.set()
         return
     await message.reply('Вход выполнен успешно!')
+    await state.finish()
     await showAdminPanel(message)
 
 
