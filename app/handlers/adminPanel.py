@@ -34,16 +34,20 @@ async def showAdminPanel(message: types.Message):
 # Колбэк на кнопку "Управление полётом"
 async def callbackFlyControl(call: types.CallbackQuery):
     keyboard = types.InlineKeyboardMarkup(row_width=1)
-    keyboard.add(types.InlineKeyboardButton(text="Подсказка", callback_data="Подсказка"))
-    await Answers.flyControl.set()
+    keyboard.add(types.InlineKeyboardButton(text="Подсказка", callback_data="Подсказка1"))
     await call.message.answer("Введите ключ верификации, состоящий из 9 строчных латинских символов:",
                               reply_markup=keyboard)
+
+# Колбэк на кнопку "Подсказка" в режиме "Управление полетами"
+async def callbackHint_FlyControl(call: types.CallbackQuery, state: FSMContext):
+    await call.message.answer("49.272598, -123.132872 város?")
+    await Answers.flyControl.set()
 
 
 # Проверка ответа на "Управление полётом"
 async def processFlyControl(message: types.Message, state: FSMContext):
     await state.finish()
-    if message.text != 'Vancouver':
+    if message.text.lower() != 'vancouver':
         await message.reply('Ключ верификации неверен. Попробуйте снова.')
         await Answers.flyControl.set()
         return
@@ -71,7 +75,7 @@ async def callbackUpdateSoftware(call: types.CallbackQuery):
 # Проверка ответа на "Обновление ПО"
 async def processUpdateSoftware(message: types.Message, state: FSMContext):
     await state.finish()
-    if message.text != 'Тессеракт':
+    if message.text.lower() != 'тессеракт':
         await message.reply('Подключение не удалось. Попробуйте другую комбинацию')
         await Answers.updateSoftware.set()
         return
@@ -132,14 +136,23 @@ async def callbackData(call: types.CallbackQuery):
 
 # Колбэк на кнопку "Режим автопилота"
 async def callbackAutopilot(call: types.CallbackQuery):
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
+    keyboard.add(types.InlineKeyboardButton(text="Подсказка", callback_data="Подсказка2"))
+    await call.message.answer(f"Для выполнения этого действия необходима верификация!\n"
+                              f"\n"
+                              r"Нажмите на кнопку 'Подсказка', а после введите свой ключ авторизации, состоящий из 9 латинских символов:",
+                              reply_markup=keyboard)
+
+# Колбэк на кнопку "Подсказка" в режиме "Управление полетами"
+async def callbackHint_Autopilot(call: types.CallbackQuery, state: FSMContext):
+    await call.message.answer("49.272598, -123.132872 város?")
     await Answers.autoPilot.set()
-    await call.message.answer("Введите ключ верификации, состоящий из 9 строчных латинских символов:")
 
 
 # Проверка ответа на "Режим автопилота"
 async def processAutopilot(message: types.Message, state: FSMContext):
     await state.finish()
-    if message.text != 'Vancouver':
+    if message.text.lower() != 'vancouver':
         await message.reply('Ключ верификации неверен. Попробуйте снова.')
         await Answers.autoPilot.set()
         return
@@ -164,6 +177,7 @@ async def processAutopilot(message: types.Message, state: FSMContext):
 
 def register_handlers_adminPanel(dp: Dispatcher):
     dp.register_callback_query_handler(callbackFlyControl, text="Управление полётом")
+    dp.register_callback_query_handler(callbackHint_FlyControl, text="Подсказка1")
     dp.register_message_handler(processFlyControl, state=Answers.flyControl)
     dp.register_callback_query_handler(callbackUpdateSoftware, text="Обновление ПО")
     dp.register_message_handler(processUpdateSoftware, state=Answers.updateSoftware)
@@ -171,4 +185,5 @@ def register_handlers_adminPanel(dp: Dispatcher):
     dp.register_message_handler(processCargoDumping, state=Answers.cargoDumping)
     dp.register_callback_query_handler(callbackData, text="Данные")
     dp.register_callback_query_handler(callbackAutopilot, text="Режим автопилота")
+    dp.register_callback_query_handler(callbackHint_Autopilot, text="Подсказка2")
     dp.register_message_handler(processAutopilot, state=Answers.autoPilot)

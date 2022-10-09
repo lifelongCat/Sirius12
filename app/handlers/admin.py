@@ -40,8 +40,7 @@ async def grigoryKarnacevich(call: types.CallbackQuery):
 
 
 async def processPassword(message: types.Message, state: FSMContext):
-    answer = message.text
-    if answer.lower() != adminPasswords[adminID]:
+    if message.text.lower() != adminPasswords[adminID]:
         await message.reply('Ответ на контрольный вопрос неверен. Попробуйте снова.')
         await Admin.adminPassword.set()
         return
