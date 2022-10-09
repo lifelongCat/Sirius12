@@ -3,7 +3,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from app.handlers.adminPanel import showAdminPanel
 
-adminPasswords = {0: 'Вероника', 1: 'VxWorks'}
+adminPasswords = {0: 'вероника', 1: 'vxworks'}
 adminID = None
 
 
@@ -40,7 +40,8 @@ async def grigoryKarnacevich(call: types.CallbackQuery):
 
 
 async def processPassword(message: types.Message, state: FSMContext):
-    if message.text != adminPasswords[adminID]:
+    answer = message.text
+    if answer.lower() != adminPasswords[adminID]:
         await message.reply('Ответ на контрольный вопрос неверен. Попробуйте снова.')
         await Admin.adminPassword.set()
         return
