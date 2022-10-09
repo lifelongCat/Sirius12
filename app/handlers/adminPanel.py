@@ -20,7 +20,7 @@ async def showAdminPanel(message: types.Message):
     buttons = [
         types.InlineKeyboardButton(text="Управление полётом", callback_data="Управление полётом"),
         types.InlineKeyboardButton(text="Обновление ПО", callback_data="Обновление ПО"),
-        types.InlineKeyboardButton(text="Сброс груза", callback_data="Сброс груза"),
+        types.InlineKeyboardButton(text="Сброс груза", callback_data="Сброс груза в режиме админа"),
         types.InlineKeyboardButton(text="Данные", callback_data="Данные"),
         types.InlineKeyboardButton(text="Режим автопилота", callback_data="Режим автопилота")
     ]
@@ -167,7 +167,7 @@ def register_handlers_adminPanel(dp: Dispatcher):
     dp.register_message_handler(processFlyControl, state=Answers.flyControl)
     dp.register_callback_query_handler(callbackUpdateSoftware, text="Обновление ПО")
     dp.register_message_handler(processUpdateSoftware, state=Answers.updateSoftware)
-    dp.register_callback_query_handler(callbackCargoDumping, text="Сброс груза")
+    dp.register_callback_query_handler(callbackCargoDumping, text="Сброс груза в режиме админа")
     dp.register_message_handler(processCargoDumping, state=Answers.cargoDumping)
     dp.register_callback_query_handler(callbackData, text="Данные")
     dp.register_callback_query_handler(callbackAutopilot, text="Режим автопилота")
