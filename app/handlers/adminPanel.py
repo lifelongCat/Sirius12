@@ -105,9 +105,20 @@ async def processUpdateSoftware(message: types.Message, state: FSMContext):
 
 # Колбэк на кнопку "Сброс груза"
 async def callbackCargoDumping(call: types.CallbackQuery):
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
+    keyboard.add(types.InlineKeyboardButton(text="Данные", callback_data="data"))
+    # await Answers.cargoDumping.set()
+    await call.message.answer("Чтобы вернуть грузы отправителям, вам понадобятся номера их грузов. Они содержатся в файле с данными.\n"
+                              "Нажмите на кнопку 'Данные', изучите отправленный файл, а после введите номера грузов, которые вы хотите отправить.\n"
+                              "Важно, что за раз вы можете отправить РОВНО 4 контейнера.",
+    reply_markup=keyboard)
+
+# Колбэк на кнопку "Данные"
+async def callback_Data(call: types.CallbackQuery, state: FSMContext):
+    await call.message.answer('Последнее обновление таблицы: 2022.10.12 06:00:03')
+    xls_path = "data.xlsx"
+    await call.message.answer_document(InputFile(xls_path))
     await Answers.cargoDumping.set()
-    await call.message.answer(
-        "Введите номер груза, который вы хотите вернуть отправителю. За раз можно отправить РОВНО 4 контейнера")
 
 
 # Проверка ответа на "Сброс груза"
@@ -182,6 +193,7 @@ def register_handlers_adminPanel(dp: Dispatcher):
     dp.register_callback_query_handler(callbackUpdateSoftware, text="Обновление ПО")
     dp.register_message_handler(processUpdateSoftware, state=Answers.updateSoftware)
     dp.register_callback_query_handler(callbackCargoDumping, text="Сброс груза в режиме админа")
+    dp.register_callback_query_handler(callback_Data, text ="data")
     dp.register_message_handler(processCargoDumping, state=Answers.cargoDumping)
     dp.register_callback_query_handler(callbackData, text="Данные")
     dp.register_callback_query_handler(callbackAutopilot, text="Режим автопилота")
