@@ -11,6 +11,7 @@ cargoNumbers = [72121022, 12102006, 78151290, 55005321]
 
 class Answers(StatesGroup):
     flyControl = State()
+    heightKilometres = State()
     updateSoftware = State()
     cargoDumping = State()
     autoPilot = State()
@@ -35,11 +36,13 @@ async def showAdminPanel(message: types.Message):
 async def callbackFlyControl(call: types.CallbackQuery):
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     keyboard.add(types.InlineKeyboardButton(text="Подсказка", callback_data="Подсказка1"))
-    await call.message.answer("Введите ключ верификации, состоящий из 9 строчных латинских символов:",
+    await call.message.answer(f"Для выполнения этого действия необходима верификация!\n"
+                              f"\n"
+                              r"Нажмите на кнопку 'Подсказка', а после введите свой ключ авторизации, состоящий из 9 латинских символов:",
                               reply_markup=keyboard)
 
 # Колбэк на кнопку "Подсказка" в режиме "Управление полетами"
-async def callbackHint_FlyControl(call: types.CallbackQuery, state: FSMContext):
+async def callbackHint_FlyControl(call: types.CallbackQuery):
     await call.message.answer("49.272598, -123.132872 város?")
     await Answers.flyControl.set()
 
@@ -52,7 +55,18 @@ async def processFlyControl(message: types.Message, state: FSMContext):
         await Answers.flyControl.set()
         return
     await message.reply('Действие верифицировано. Введите желаемую высоту полета станции в километрах')
-    # ВВОД ВЫСОТЫ В КИЛОМЕТРАХ
+    await Answers.heightKilometres.set()
+
+
+# Проверка высоты на "Управление полётом"
+async def processHeight(message: types.Message, state: FSMContext):
+    await state.finish()
+    if int(message.text) < 35000:
+        await message.reply('Слишком малая высота! Угроза сваливания спутника. Выберите другую высоту')
+    elif int(message.text) > 45000:
+        await message.reply('Слишком большая высота! Угроза потери контроля над станцией. Выберите другую высоту')
+    else:
+        await message.reply('Высота принята! Начинаю корректировку орбиты')
     await showAdminPanel(message)
 
 
@@ -113,8 +127,9 @@ async def callbackCargoDumping(call: types.CallbackQuery):
                               "Важно, что за раз вы можете отправить РОВНО 4 контейнера.",
     reply_markup=keyboard)
 
+
 # Колбэк на кнопку "Данные"
-async def callback_Data(call: types.CallbackQuery, state: FSMContext):
+async def callback_Data(call: types.CallbackQuery):
     await call.message.answer('Последнее обновление таблицы: 2022.10.12 06:00:03')
     xls_path = "data.xlsx"
     await call.message.answer_document(InputFile(xls_path))
@@ -154,6 +169,7 @@ async def callbackAutopilot(call: types.CallbackQuery):
                               r"Нажмите на кнопку 'Подсказка', а после введите свой ключ авторизации, состоящий из 9 латинских символов:",
                               reply_markup=keyboard)
 
+
 # Колбэк на кнопку "Подсказка" в режиме "Управление полетами"
 async def callbackHint_Autopilot(call: types.CallbackQuery, state: FSMContext):
     await call.message.answer("49.272598, -123.132872 város?")
@@ -190,6 +206,7 @@ def register_handlers_adminPanel(dp: Dispatcher):
     dp.register_callback_query_handler(callbackFlyControl, text="Управление полётом")
     dp.register_callback_query_handler(callbackHint_FlyControl, text="Подсказка1")
     dp.register_message_handler(processFlyControl, state=Answers.flyControl)
+    dp.register_message_handler(processHeight, state=Answers.heightKilometres)
     dp.register_callback_query_handler(callbackUpdateSoftware, text="Обновление ПО")
     dp.register_message_handler(processUpdateSoftware, state=Answers.updateSoftware)
     dp.register_callback_query_handler(callbackCargoDumping, text="Сброс груза в режиме админа")
