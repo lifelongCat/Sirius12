@@ -74,11 +74,15 @@ async def processHeight(message: types.Message, state: FSMContext):
     await state.finish()
     if int(message.text) < 35000:
         await message.reply('Слишком малая высота! Угроза сваливания спутника. Выберите другую высоту')
+        await Answers.heightKilometres.set()
+        return
     elif int(message.text) > 45000:
         await message.reply('Слишком большая высота! Угроза потери контроля над станцией. Выберите другую высоту')
+        await Answers.heightKilometres.set()
+        return
     else:
         await message.reply('Высота принята! Начинаю корректировку орбиты')
-    await showAdminPanel(message)
+        await showAdminPanel(message)
 
 
 # Колбэк на кнопку "Обновление ПО"
