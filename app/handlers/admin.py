@@ -1,3 +1,5 @@
+import time
+
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -19,7 +21,8 @@ async def admin(message: types.Message):
     ]
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     keyboard.add(*buttons)
-    await message.reply(f"Добрый день, администратор! Выберите свой аккаунт:",
+    await message.reply(f"👩‍🔧ВХОД В РЕЖИМ АДМИНИСТРАТОРА🧑‍🔧\n"
+                        f"Созданно 2 аккаунта администратора. Выберите тот, в который хотите войти ➡️",
                         reply_markup=keyboard)
 
 
@@ -27,25 +30,29 @@ async def tonyStark(call: types.CallbackQuery):
     global adminID
     adminID = 0
     await Admin.admin_password.set()
-    await call.message.answer("Для входа в аккаунт введите ответ на контрольный вопрос: Какое кодовое название носило "
-                              "модульное дополнение к костюму железного человека, предназначенное для борьбы с Халком?")
+    await call.message.answer(text="Добрый день, мистер Старк!👋\n"
+                                   "🗝 Для входа в аккаунт, введите ответ на контрольный вопрос:\n"
+                                   "Какое кодовое название носило модульное дополнение к костюму железного человека, предназначенное для борьбы с Халком?")
 
 
 async def grigoryKarnacevich(call: types.CallbackQuery):
     global adminID
     adminID = 1
     await Admin.admin_password.set()
-    await call.message.answer("Для входа в аккаунт введите ответ на контрольный вопрос: с помощью какой операционной "
-                              "системы управляется марсоходом Curiosity?")
+    await call.message.answer(text="Добрый день, мистер Карнацевич! 👋\n"
+                                   "🗝 Для входа в аккаунт, введите ответ на контрольный вопрос:\n"
+                                   "C помошью какой операционной систему управляется марсоход Curiosity?")
 
 
 async def processPassword(message: types.Message, state: FSMContext):
     if message.text.lower() != adminPasswords[adminID]:
-        await message.reply('Ответ на контрольный вопрос неверен. Попробуйте снова.')
+        await message.reply('❌НЕВЕРНЫЙ ОТВЕТ НА КОНТРОЛЬНЫЙ ВОПРОС❌\n'
+                            'Проверьте ответ и введите его снова ➡️')
         await Admin.adminPassword.set()
         return
-    await message.reply('Вход выполнен успешно!')
+    await message.reply('Вход выполнен успешно!✅')
     await state.finish()
+    time.sleep(5)
     await showAdminPanel(message)
 
 
