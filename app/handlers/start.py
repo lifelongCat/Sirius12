@@ -19,11 +19,13 @@ async def start(message: types.Message):
 async def status(call: types.CallbackQuery):
     # ОТФОРМАТИРОВАТЬ ПО PEP8
     time = datetime.datetime.now()
-    await call.message.answer(text=f"Показатели станции на {time.year}/{time.month}/{time.day} {time.hour}:{time.minute} 🧭⏱🔋\n"
-                                   f"🚀 Высота: {random.randint(20000, 30000)} километров н.у.м.\n"
-                                   f"🎛 Скорость: {random.randint(6000, 12000)} м/с\n"
-                                   f"📦 Масса груза: 4697 килогрмма\n"
-                                   f"📡 Температура вокруг: +4°C")
+    await call.message.answer(
+        text=f"Показатели станции на {time.year}/{time.month}/{time.day} {time.hour}:{time.minute} 🧭⏱🔋\n"
+             f"🚀 Высота: {random.randint(20000, 30000)} километров н.у.м.\n"
+             f"🎛 Скорость: {random.randint(6000, 12000)} м/с\n"
+             f"📦 Масса груза: 4697 килогрмма\n"
+             f"📡 Температура вокруг: +4°C")
+
 
 async def cargoDumping(call: types.CallbackQuery):
     await call.message.answer(
